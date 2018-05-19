@@ -1,4 +1,4 @@
-Go-MultipleFileUpload
+MultipleFileUpload
 =====================
-
-Multiple File Upload with Go
+可以支持多个文件下载的小工具
+微信和QQ在局域网内传文件的速度越来越慢，自己写个小工具传把。

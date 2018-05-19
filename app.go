@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"html/template"
 	"io"
 	"net/http"
@@ -77,9 +78,12 @@ func main() {
 	ip := GetIp()
 	addr := ip + ":8080/upload"
 	go func() {
+		fmt.Println("当前上传后存储地址为-->" + destLocalPath)
+		fmt.Println("直接扫下面的二维码，可以打开上传文件的网页")
 		obj := qrcodeTerminal.New()
 		obj.Get(addr).Print()
 	}()
+
 	//Listen on port 8080
 	http.ListenAndServe(":8080", nil)
 }
