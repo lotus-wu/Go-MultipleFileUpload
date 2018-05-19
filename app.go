@@ -7,6 +7,9 @@ import (
 	"os"
 )
 
+//Set the path you want to store file
+const destLocalPath = "D:/"
+
 //Compile templates on start
 var templates = template.Must(template.ParseFiles("tmpl/upload.html"))
 
@@ -24,39 +27,37 @@ func uploadHandler(w http.ResponseWriter, r *http.Request) {
 
 	//POST takes the uploaded file(s) and saves it to disk.
 	case "POST":
-		//parse the multipart form in the request
-		err := r.ParseMultipartForm(100000)
+		//get the multipart reader for the request.
+		reader, err := r.MultipartReader()
+
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
-		//get a ref to the parsed multipart form
-		m := r.MultipartForm
-
-		//get the *fileheaders
-		files := m.File["myfiles"]
-		for i, _ := range files {
-			//for each fileheader, get a handle to the actual file
-			file, err := files[i].Open()
-			defer file.Close()
-			if err != nil {
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
+		//copy each part to destination.
+		for {
+			part, err := reader.NextPart()
+			if err == io.EOF {
+				break
 			}
-			//create destination file making sure the path is writeable.
-			dst, err := os.Create("/home/sanat/" + files[i].Filename)
+
+			//if part.FileName() is empty, skip this iteration.
+			if part.FileName() == "" {
+				continue
+			}
+			dst, err := os.Create(destLocalPath + part.FileName())
 			defer dst.Close()
+
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
 			}
-			//copy the uploaded file to the destination file
-			if _, err := io.Copy(dst, file); err != nil {
+
+			if _, err := io.Copy(dst, part); err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
 			}
-
 		}
 		//display success message.
 		display(w, "upload", "Upload successful.")
