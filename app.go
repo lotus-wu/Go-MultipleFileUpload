@@ -5,6 +5,8 @@ import (
 	"io"
 	"net/http"
 	"os"
+
+	"github.com/Baozisoftware/qrcode-terminal-go"
 )
 
 //Set the path you want to store file
@@ -72,6 +74,12 @@ func main() {
 	//static file handler.
 	http.Handle("/assets/", http.StripPrefix("/assets/", http.FileServer(http.Dir("assets"))))
 
+	ip := GetIp()
+	addr := ip + ":8080/upload"
+	go func() {
+		obj := qrcodeTerminal.New()
+		obj.Get(addr).Print()
+	}()
 	//Listen on port 8080
 	http.ListenAndServe(":8080", nil)
 }
